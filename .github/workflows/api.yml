@@ -1,0 +1,133 @@
+name: API
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: api
+
+jobs:
+  verify:
+    name: Lint, test, and build
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: api
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --include=optional
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  deploy-dev:
+    name: Deploy Dev
+    needs: verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Trigger Render dev deploy
+        run: curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
+
+      - name: Wait for dev API
+        run: |
+          for attempt in $(seq 1 36); do
+            if curl --fail --silent --show-error "${API_URL}/health/live" > /dev/null; then
+              echo "Dev API is live"
+              exit 0
+            fi
+            echo "Waiting for dev API... (${attempt}/36)"
+            sleep 10
+          done
+          echo "Dev API did not become healthy in time"
+          exit 1
+        env:
+          API_URL: ${{ secrets.LEARNMAP_API_URL }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            api
+            scripts
+
+      - name: Tag dev deployment
+        working-directory: .
+        run: bash scripts/git-tag-deployment.sh dev api
+
+  approve-production:
+    name: Approve production deploy
+    needs: deploy-dev
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - run: echo "Dev deploy succeeded — proceeding to production"
+
+  deploy-prod:
+    name: Deploy Production
+    needs: approve-production
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Trigger Render production deploy
+        run: curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            api
+            scripts
+
+      - name: Tag production deployment
+        working-directory: .
+        run: bash scripts/git-tag-deployment.sh prod api

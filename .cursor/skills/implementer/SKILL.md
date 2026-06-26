@@ -175,8 +175,8 @@ Fixes #9
 - [...]
 
 ## Test plan
-- [ ] `npm run lint:api` passes
-- [ ] `npm run build:api` passes
+- [ ] `cd api && npm run lint` passes
+- [ ] `cd api && npm run build` passes
 - [ ] [Story-specific verification steps from handover / AC]
 
 EOF

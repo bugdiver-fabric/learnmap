@@ -19,7 +19,7 @@ Do not expect a separate `learnmap/api` GitHub repository.
 
 - API code belongs under `api/` — not repo root `src/`.
 - Shared env: root `.env.example`; never commit `.env`.
-- Root `package.json` uses npm **workspaces**; package scripts live in `api/package.json`.
+- Each package has its own `package.json` and lockfile (`api/`, `app/`). No root npm workspace.
 
 ## PR scope
 

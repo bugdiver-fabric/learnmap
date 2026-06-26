@@ -18,8 +18,10 @@
 git clone git@github.com:AI-warriors-au/roadmap-build.git
 cd roadmap-build
 cp .env.example .env
-npm install
+docker compose up
 ```
+
+Each package (`api/`, `app/`) has its own `package.json` and lockfile. There is no root npm workspace — run commands from the package directory, or use Docker.
 
 ## Docker (full stack)
 
@@ -44,29 +46,31 @@ docker compose exec api npm run db:migration:deploy  # migrate manually
 
 Migrations run automatically when the API container starts. Set `SEED_DATABASE=true` in `.env` to seed on startup (once `prisma.seed` is configured in `api/package.json`).
 
-## Local API
+## Local API (without Docker for the API process)
 
 ```bash
 docker compose up -d postgres     # or use your own PostgreSQL
+cd api && npm ci --include=dev
 npm run db:migration:deploy
-npm run start:api
+npm run start:dev
 curl http://localhost:3000/health
 ```
 
-| Task | Command |
-|------|---------|
-| Start API | `npm run start:api` |
-| Lint | `npm run lint:api` |
-| Build | `npm run build:api` |
+| Task | Command (from `api/`) |
+|------|------------------------|
+| Start API | `npm run start:dev` |
+| Lint | `npm run lint` |
+| Build | `npm run build` |
+| Test | `npm run test` |
 
 ## Database / Prisma
 
 Schema: `api/prisma/schema.prisma` · Migrations: `api/prisma/migrations/`
 
-Use npm scripts from the repo root (loads `DATABASE_URL` from `.env`):
+Use npm scripts from `api/` (loads `DATABASE_URL` from `.env` at repo root or `api/.env`):
 
-| Task | Command |
-|------|---------|
+| Task | Command (from `api/`) |
+|------|------------------------|
 | Apply migrations | `npm run db:migration:deploy` |
 | Create migration | `npm run db:migration:generate -- --name descriptive_name` |
 | Reset database | `npm run db:migration:reset` |
@@ -76,6 +80,7 @@ Use npm scripts from the repo root (loads `DATABASE_URL` from `.env`):
 After editing `schema.prisma`:
 
 ```bash
+cd api
 npm run db:migration:generate -- --name add_my_change
 npm run db:migration:deploy
 ```
@@ -89,21 +94,22 @@ Commit `schema.prisma` and the new file under `api/prisma/migrations/`.
 DATABASE_URL=postgresql://learnmap:learnmap@localhost:5432/learnmap
 ```
 
-## App
+## App (local, without Docker for the app process)
 
 ```bash
-npm run start:app
+cd app && npm ci --include=optional
+npm run start:dev
 ```
 
-| Task | Command |
-|------|---------|
-| Lint | `npm run lint:app` |
-| Build | `npm run build:app` |
-| Test | `npm run test:app` |
+| Task | Command (from `app/`) |
+|------|------------------------|
+| Lint | `npm run lint` |
+| Build | `npm run build` |
+| Test | `npm run test` |
 
 ## Deployment
 
-Option C (Render + Neon) with **GitHub Actions deploy hooks** so the whole team can ship without Render seats. See [`docs/deployment-render.md`](docs/deployment-render.md) and [`render.yaml`](render.yaml).
+Deploy on **Render (free)** + **Neon**, orchestrated by GitHub Actions — no Blueprint. One workflow per service: lint / test / build → Dev → manual approval → Prod. See [`docs/deployment-render.md`](docs/deployment-render.md).
 
 ## Agent / GitHub MCP
 

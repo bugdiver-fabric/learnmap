@@ -9,7 +9,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, __dirname, '')
+  const repoRoot = path.resolve(__dirname, '..')
+  const env = {
+    ...loadEnv(mode, repoRoot, ''),
+    ...loadEnv(mode, __dirname, ''),
+  }
 
   return {
     plugins: [react(), tailwindcss()],

@@ -20,6 +20,13 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
+  it('/health/live (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/health/live')
+      .expect(200)
+      .expect({ status: 'ok' });
+  });
+
   it('/health (GET)', () => {
     return request(app.getHttpServer())
       .get('/health')
