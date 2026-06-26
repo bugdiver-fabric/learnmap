@@ -19,10 +19,11 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: api/Dockerfile.dev
+      context: ./api
+      dockerfile: Dockerfile.dev
     container_name: learnmap-api
     restart: unless-stopped
+    working_dir: /app
     ports:
       - '3000:3000'
     environment:
@@ -31,27 +32,26 @@ services:
       DATABASE_URL: postgresql://learnmap:learnmap@postgres:5432/learnmap
       SEED_DATABASE: ${SEED_DATABASE:-false}
     volumes:
-      - .:/workspace
-      - /workspace/node_modules
-      - /workspace/api/node_modules
+      - ./api:/app
+      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
 
   app:
     build:
-      context: .
-      dockerfile: app/Dockerfile.dev
+      context: ./app
+      dockerfile: Dockerfile.dev
     container_name: learnmap-app
     restart: unless-stopped
+    working_dir: /app
     ports:
       - '5173:5173'
     environment:
       VITE_API_PROXY_TARGET: http://api:3000
     volumes:
-      - .:/workspace
-      - /workspace/node_modules
-      - /workspace/app/node_modules
+      - ./app:/app
+      - /app/node_modules
     depends_on:
       - api
 

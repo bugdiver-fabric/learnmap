@@ -101,6 +101,10 @@ npm run start:app
 | Build | `npm run build:app` |
 | Test | `npm run test:app` |
 
+## Deployment
+
+Option C (Render + Neon) with **GitHub Actions deploy hooks** so the whole team can ship without Render seats. See [`docs/deployment-render.md`](docs/deployment-render.md) and [`render.yaml`](render.yaml).
+
 ## Agent / GitHub MCP
 
 ```bash

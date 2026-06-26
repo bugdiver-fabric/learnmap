@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 
-cd /workspace/api
+echo "Generating Prisma client..."
+npx prisma generate
 
 echo "Applying database migrations..."
 npm run db:migration:deploy
@@ -11,5 +12,4 @@ if [ "${SEED_DATABASE:-false}" = "true" ]; then
   npm run db:seed
 fi
 
-cd /workspace
 exec "$@"
