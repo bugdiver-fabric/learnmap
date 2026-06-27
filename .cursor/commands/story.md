@@ -76,8 +76,9 @@ Follow **planner-agent** § On human approval:
 
 1. Copy draft → `.ai/plans/story-{id}.md`
 2. Set `**Status:** Approved` with approval metadata
-3. Post GitHub issue comment per **story-to-requirements** Step 8 (in scope, out of scope, FR, NFR)
-4. Warn if 🔴 blocking open questions remain (human overrode by approving)
+3. Warn if 🔴 blocking open questions remain (human overrode by approving)
+
+Do **not** post a GitHub issue comment unless the user explicitly asks — see **github-work**.
 
 ---
 
@@ -118,7 +119,7 @@ Follow **implementer** Phase 7 (`.cursor/skills/implementer/SKILL.md`):
 2. Create or checkout `feature/{NNNN}-{short-desc}`
 3. Commit with **github-work** message format
 4. Push and open PR targeting `main` (summary, changes, test plan)
-5. Comment on the issue with the PR link
+5. Share the PR URL in chat — **do not** comment on the issue unless the user explicitly asks (**github-work**)
 
 **Rules:** Never ship without human code review approval. Use **github-work** for all GitHub operations.
 
