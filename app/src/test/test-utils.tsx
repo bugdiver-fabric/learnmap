@@ -3,6 +3,12 @@ import { render, type RenderOptions } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 
+import {
+  AuthProvider,
+  createMockUser,
+  type AuthUser,
+} from '@/contexts/AuthContext'
+
 function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -15,17 +21,26 @@ function createTestQueryClient() {
 
 type RenderWithProvidersOptions = RenderOptions & {
   route?: string
+  authUser?: AuthUser | null
+  authLoading?: boolean
 }
 
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', ...options }: RenderWithProvidersOptions = {},
+  {
+    route = '/',
+    authUser = createMockUser(),
+    authLoading = false,
+    ...options
+  }: RenderWithProvidersOptions = {},
 ) {
   const queryClient = createTestQueryClient()
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>
+      <AuthProvider initialUser={authUser} initialLoading={authLoading}>
+        <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>,
     options,
   )
