@@ -155,13 +155,11 @@ When the human replies **`Approved`** (or equivalent):
 
 5. Leave the draft file unchanged for audit trail
 
-### Post approval comment on GitHub
-
-Follow **story-to-requirements** Step 8: comment on the source issue with in-scope, out-of-scope, functional, and non-functional requirements from the approved plan. Use **github-work**.
-
 ### Then hand off
 
 Invoke **implementer** skill.
+
+Do **not** post a GitHub issue comment on plan approval unless the user explicitly asks — see **github-work** (never on external repos such as `learnmap/specs` unless confirmed).
 
 ---
 

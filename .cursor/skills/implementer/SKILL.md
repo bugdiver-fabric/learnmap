@@ -3,8 +3,8 @@ name: implementer
 description: >-
   Orchestrates approved plan implementation. Delegates to nestjs, prisma, test,
   validation skills. Writes .ai/implementation/story-{id}.md. After human code
-  review approval, ships via feature branch, commit, PR, and issue comment using
-  github-work. Never creates requirements or self-approves.
+  review approval, ships via feature branch, commit, and PR using github-work. Never
+  creates requirements or self-approves. Does not post issue comments unless the user asks.
 ---
 
 # Implementer
@@ -25,7 +25,7 @@ Act as a **senior full stack developer**. Read the codebase first; delegate stac
 | **prisma** | Schema, migrations, queries |
 | **validation** | DTOs, class-validator |
 | **test** | Unit tests, lint/build/test commands |
-| **github-work** | Branch, commit, push, PR, issue comment (Phase 7 only) |
+| **github-work** | Branch, commit, push, PR (Phase 7 only; no issue comments unless user asks) |
 
 Read each skill from `.cursor/skills/<name>/SKILL.md` when that layer is touched.
 
@@ -192,23 +192,13 @@ EOF
 
 Capture the PR URL and number from `gh pr create` output.
 
-#### Step 7.5 — Comment on the story
+#### Step 7.5 — Notify (chat only by default)
 
-Post a single comment on the source issue using **github-work**:
+Share the PR URL in chat. **Do not** post an issue comment unless the user explicitly asks — follow **github-work** (no comments on external repos unless confirmed).
 
-```bash
-gh issue comment {id} -R {owner}/{repo} --body "$(cat <<'EOF'
-Implementation shipped for review.
+Update `.ai/implementation/story-{id}.md` with PR link and set status to **Shipped — PR open**.
 
-**PR:** #{pr-number} — {pr-url}
-
-EOF
-)"
-```
-
-Confirm the comment was posted. Update `.ai/implementation/story-{id}.md` with PR link and set status to **Shipped — PR open**.
-
-**Chat summary:** PR URL, branch name, commit SHA(s), issue comment confirmed.
+**Chat summary:** PR URL, branch name, commit SHA(s).
 
 ---
 
@@ -238,4 +228,4 @@ Confirm the comment was posted. Update `.ai/implementation/story-{id}.md` with P
 | **planner-agent** | Upstream — approved plan |
 | **implementer-agent** | Subagent — `.cursor/agents/implementer-agent.md` |
 | **story** | Command — `/story {id}` |
-| **github-work** | Phase 7 — branch, commit, PR, issue comment |
+| **github-work** | Phase 7 — branch, commit, PR (no issue comments unless user asks) |
