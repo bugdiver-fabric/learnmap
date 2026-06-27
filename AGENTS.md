@@ -29,7 +29,9 @@ See `.ai/context/repo-layout.md` for full layout notes (local handoff).
 | **nestjs** | NestJS modules, controllers, services — delegated by implementer |
 | **prisma** | Schema, migrations, queries — delegated by implementer |
 | **validation** | DTOs, class-validator — delegated by implementer |
-| **test** | Unit tests, lint/build/test — delegated by implementer |
+| **fe-test** | `app/` Vitest + RTL unit/component tests — delegated by implementer |
+| **be-test** | `api/` Jest + NestJS unit/e2e tests — delegated by implementer |
+| **test** | Index — pick fe-test or be-test; run lint/build/test |
 
 ## Bugbot PR review
 
@@ -63,6 +65,6 @@ Approved         # After code review — Phase 7 ship (branch, commit, PR)
 ```
 
 - **PlannerAgent** → **planner-agent** (uses **story-to-requirements** internally)
-- **ImplementerAgent** → **implementer** + **nestjs** / **prisma** / **validation** / **test**
+- **ImplementerAgent** → **implementer** + **nestjs** / **prisma** / **validation** / **fe-test** / **be-test**
 
 Never self-approve. Phase 2 runs only after explicit human approval.
