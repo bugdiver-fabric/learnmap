@@ -53,10 +53,41 @@ jobs:
       - name: Build
         run: npm run build
 
-  deploy-dev:
-    name: Deploy Dev
+  migrate-dev:
+    name: Migrate dev database
     needs: verify
     if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: api
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --include=optional
+
+      - name: Apply pending migrations
+        run: npm run db:migration:deploy
+
+  deploy-dev:
+    name: Deploy Dev
+    needs:
+      - verify
+      - migrate-dev
+    if: |
+      github.event_name == 'push' &&
+      needs.verify.result == 'success' &&
+      needs.migrate-dev.result == 'success'
     runs-on: ubuntu-latest
     environment: dev
     defaults:
@@ -106,10 +137,41 @@ jobs:
     steps:
       - run: echo "Dev deploy succeeded — proceeding to production"
 
-  deploy-prod:
-    name: Deploy Production
+  migrate-prod:
+    name: Migrate production database
     needs: approve-production
     if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: api
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --include=optional
+
+      - name: Apply pending migrations
+        run: npm run db:migration:deploy
+
+  deploy-prod:
+    name: Deploy Production
+    needs:
+      - approve-production
+      - migrate-prod
+    if: |
+      github.event_name == 'push' &&
+      needs.approve-production.result == 'success' &&
+      needs.migrate-prod.result == 'success'
     runs-on: ubuntu-latest
     environment: production
     defaults:
